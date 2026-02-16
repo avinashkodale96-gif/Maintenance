@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supreme Autocasts Pvt Ltd - Maintenance Portal</title>
+    <style>
+        :root {
+            --primary: #1a2a6c;
+            --accent: #b21f1f;
+            --success: #27ae60;
+            --secondary: #fdbb2d;
+            --light: #f8f9fa;
+        }
+
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #eef2f3; margin: 0; padding: 15px; }
+        
+        /* कंपनी हेडर स्टाइल */
+        header { 
+            background: linear-gradient(to right, #1a2a6c, #b21f1f, #fdbb2d); 
+            color: white; 
+            padding: 25px; 
+            text-align: center; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        header h1 { margin: 0; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; }
+        header p { margin: 5px 0 0; opacity: 0.9; font-weight: bold; }
+
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-top: 6px solid var(--accent); }
+        .card-inventory { border-top-color: var(--secondary); }
+        .card-preventive { border-top-color: var(--primary); }
+
+        h2 { margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        
+        .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; width: 100%; }
+        .btn-submit { background: var(--accent); }
+        .btn-submit:hover { background: #8e1a1a; }
+        .btn-download { background: var(--success); margin-bottom: 20px; max-width: 300px; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); }
+
+        .table-res { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #f4f4f4; color: #555; text-transform: uppercase; font-size: 12px; }
+
+        #preview { width: 80px; height: 80px; object-fit: cover; display: none; border-radius: 5px; margin-bottom: 10px; border: 2px solid #ddd; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .low-stock { background: #ffebee; color: #c62828; }
+        .ok-stock { background: #e8f5e9; color: #2e7d32; }
+
+        footer { text-align: center; margin-top: 30px; color: #777; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Supreme Autocasts Pvt. Ltd.</h1>
+    <p>मेंटेनन्स मॅनेजमेंट सिस्टीम (FOUNDRY DIVISION)</p>
+</header>
+
+<center>
+    <button class="btn btn-download" onclick="downloadCSV()">⬇️ EXCEL रिपोर्ट डाउनलोड करा</button>
+</center>
+
+<div class="grid-container">
+    <div class="card">
+        <h2>🛠️ ब्रेकडाउन लॉग (New Entry)</h2>
+        <form id="mainForm">
+            <input type="text" id="mName" placeholder="मशीनचे नाव आणि नंबर" required>
+            <textarea id="mIssue" rows="3" placeholder="समस्येचे थोडक्यात वर्णन" required></textarea>
+            <label style="font-size: 12px; font-weight: bold;">📷 बिघाडाचा फोटो अपलोड करा:</label>
+            <input type="file" id="mImage" accept="image/*" onchange="showPreview(event)">
+            <img id="preview">
+            <button type="submit" class="btn btn-submit">तक्रार सबमिट करा</button>
+        </form>
+    </div>
+
+    <div class="card card-inventory">
+        <h2>📦 स्पेयर पार्ट स्टॉक (Current)</h2>
+        <div class="table-res">
+            <table>
+                <thead>
+                    <tr><th>पार्टचे नाव</th><th>स्टॉक</th><th>स्थिती</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Hydraulic Oil (68)</td><td>40L</td><td><span class="status-badge low-stock">Low Stock</span></td></tr>
+                    <tr><td>V-Belt (B-Type)</td><td>15 Nos</td><td><span class="status-badge ok-stock">Sufficient</span></td></tr>
+                    <tr><td>Furnace Coils</td><td>2 Set</td><td><span class="status-badge ok-stock">Sufficient</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card card-preventive">
+        <h2>📅 आगामी देखभाल (PM Schedule)</h2>
+        <div class="table-res">
+            <table>
+                <thead>
+                    <tr><th>मशीन</th><th>तारीख</th><th>स्थिती</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Knockout Machine</td><td>18-Feb</td><td><button onclick="markPM(this)">Mark Done</button></td></tr>
+                    <tr><td>Sand Mixer</td><td>22-Feb</td><td><button onclick="markPM(this)">Mark Done</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 25px; border-top-color: #333;">
+    <h2>📝 दैनिक ब्रेकडाउन रजिस्टर - Supreme Autocasts</h2>
+    <div class="table-res">
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>वेळ/तारीख</th>
+                    <th>मशीन</th>
+                    <th>समस्या</th>
+                    <th>फोटो</th>
+                    <th>स्टेटस</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    &copy; 2024 Supreme Autocasts Pvt. Ltd. | Maintenance Dept. System
+</footer>
+
+<script>
+    function showPreview(event) {
+        let output = document.getElementById('preview');
+        if(event.target.files[0]) {
+            output.src = URL.createObjectURL(event.target.files[0]);
+            output.style.display = "block";
+        }
+    }
+
+    document.getElementById('mainForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let name = document.getElementById('mName').value;
+        let issue = document.getElementById('mIssue').value;
+        let imgInput = document.getElementById('mImage');
+        let date = new Date().toLocaleDateString();
+        let time = new Date().toLocaleTimeString();
+        
+        let imgTag = "No Photo";
+        if (imgInput.files && imgInput.files[0]) {
+            imgTag = `<img src="${URL.createObjectURL(imgInput.files[0])}" width="50" style="border-radius:4px;">`;
+        }
+
+        let table = document.getElementById('reportTable').getElementsByTagName('tbody')[0];
+        let row = table.insertRow(0);
+        row.innerHTML = `<td>${date} ${time}</td><td>${name}</td><td>${issue}</td><td>${imgTag}</td><td><b style="color:#b21f1f;">PENDING</b></td>`;
+
+        this.reset();
+        document.getElementById('preview').style.display = "none";
+        alert("तक्रार यशस्वीरित्या नोंदवली गेली!");
+    });
+
+    function markPM(btn) {
+        btn.parentElement.parentElement.style.opacity = "0.5";
+        btn.innerText = "COMPLETED ✅";
+        btn.disabled = true;
+    }
+
+    function downloadCSV() {
+        let csv = [];
+        let rows = document.querySelectorAll("table tr");
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 0; j < cols.length; j++) row.push(cols[j].innerText);
+            csv.push(row.join(","));
+        }
+        let blob = new Blob([csv.join("\n")], {type: "text/csv"});
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Supreme_Autocasts_Maintenance_Report.csv";
+        link.click();
+    }
+</script>
+
+</body>
+</html>
